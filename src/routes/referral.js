@@ -12,7 +12,7 @@ const router = express.Router();
 const db = require('../database/db');
 
 router.post('/', async (req, res) => {
-
+console.log('BODY RECEIVED:', req.body);
   try {
 
     const {
