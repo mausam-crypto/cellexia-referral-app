@@ -3,7 +3,6 @@ router.post('/', async (req, res) => {
   console.log('REFERRAL ENDPOINT HIT');
   console.log(req.body);
 
-  ...
 });
 
 const {
