@@ -1,3 +1,13 @@
+console.log(
+  "SHOPIFY_STORE:",
+  process.env.SHOPIFY_STORE
+);
+
+console.log(
+  "SHOPIFY_API_VERSION:",
+  process.env.SHOPIFY_API_VERSION
+);
+
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 require('./src/database/initDatabase');
