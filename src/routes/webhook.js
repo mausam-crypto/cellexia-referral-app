@@ -1,8 +1,3 @@
-router.post('/', async (req, res) => {
-
-  console.log('REFERRAL ENDPOINT HIT');
-  console.log(req.body);
-});
 
 const express = require('express');
 const router = express.Router();
@@ -17,6 +12,13 @@ const {
   createRewardDiscount
 } = require('../services/rewardService');
 const db = require('../database/db');
+
+router.post('/', async (req, res) => {
+
+  console.log('REFERRAL ENDPOINT HIT');
+  console.log(req.body);
+});
+
 
 router.post(
   '/order-created',
