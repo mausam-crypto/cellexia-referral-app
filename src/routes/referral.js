@@ -13,13 +13,11 @@ const db = require('../database/db');
 
 router.post('/', async (req, res) => {
 
+  console.log('========================');
   console.log('REFERRAL ENDPOINT HIT');
-  console.log(req.body);
+  console.log('BODY RECEIVED:', req.body);
+  console.log('========================');
 
-});
-
-router.post('/', async (req, res) => {
-console.log('BODY RECEIVED:', req.body);
   try {
 
     const {
@@ -35,6 +33,8 @@ console.log('BODY RECEIVED:', req.body);
       !friends.length
     ) {
 
+      console.log('VALIDATION FAILED');
+
       return res.status(400).json({
         success: false,
         message: 'Missing required fields'
@@ -46,7 +46,6 @@ console.log('BODY RECEIVED:', req.body);
       `Referral received from ${referrer_email}`
     );
 
-    // Remove duplicate emails from same submission
     const uniqueFriends = [
       ...new Set(
         friends.map(
@@ -60,7 +59,8 @@ console.log('BODY RECEIVED:', req.body);
 
     for (const friend of uniqueFriends) {
 
-      // Prevent self referral
+      console.log('PROCESSING FRIEND:', friend);
+
       if (
         friend ===
         referrer_email.toLowerCase().trim()
@@ -73,7 +73,6 @@ console.log('BODY RECEIVED:', req.body);
 
       }
 
-      // Prevent duplicate referrals
       const existingReferral =
         await new Promise(
           (resolve, reject) => {
@@ -107,22 +106,29 @@ console.log('BODY RECEIVED:', req.body);
 
       }
 
-      // Create Shopify discount
+      console.log('CREATING DISCOUNT');
+
+      // TEMP TEST MODE
+      const discount = {
+        code: 'TEST123'
+      };
+
+      console.log(
+        'DISCOUNT CREATED:',
+        discount.code
+      );
+
+      /*
       const discount =
         await createFriendDiscount(friend);
 
-      // Send Klaviyo event
       await sendReferralToKlaviyo(
         friend,
         discount.code,
         referrer_name
       );
+      */
 
-      console.log(
-        'SHOPIFY DISCOUNT SERVICE RUNNING'
-      );
-
-      // Save referral
       db.run(
         `
         INSERT INTO referrals (
@@ -152,11 +158,11 @@ console.log('BODY RECEIVED:', req.body);
 
   } catch (error) {
 
-    console.error(error);
+    console.error('ERROR:', error);
 
     return res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: error.message
     });
 
   }
