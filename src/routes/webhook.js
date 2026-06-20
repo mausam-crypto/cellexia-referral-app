@@ -74,6 +74,20 @@ router.post(
       console.log(referral);
 
       if (
+  discount_code !== referral.friend_discount_code
+) {
+
+  console.log(
+    'Referral code not used'
+  );
+
+  return res
+    .status(200)
+    .send('Discount not used');
+
+}
+
+      if (
         referral.status === 'completed'
       ) {
 
