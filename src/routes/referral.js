@@ -13,10 +13,7 @@ const db = require('../database/db');
 
 router.post('/', async (req, res) => {
 
-  console.log('========================');
-  console.log('REFERRAL ENDPOINT HIT');
   console.log('BODY RECEIVED:', req.body);
-  console.log('========================');
 
   try {
 
@@ -32,8 +29,6 @@ router.post('/', async (req, res) => {
       !friends ||
       !friends.length
     ) {
-
-      console.log('VALIDATION FAILED');
 
       return res.status(400).json({
         success: false,
@@ -58,8 +53,6 @@ router.post('/', async (req, res) => {
     let savedCount = 0;
 
     for (const friend of uniqueFriends) {
-
-      console.log('PROCESSING FRIEND:', friend);
 
       if (
         friend ===
@@ -106,28 +99,28 @@ router.post('/', async (req, res) => {
 
       }
 
-      console.log('CREATING DISCOUNT');
-
-      // TEMP TEST MODE
-      const discount = {
-        code: 'TEST123'
-      };
-
       console.log(
-        'DISCOUNT CREATED:',
-        discount.code
+        'Creating discount for:',
+        friend
       );
 
-      /*
       const discount =
         await createFriendDiscount(friend);
+
+      console.log(
+        'Discount created:',
+        discount.code
+      );
 
       await sendReferralToKlaviyo(
         friend,
         discount.code,
         referrer_name
       );
-      */
+
+      console.log(
+        'Klaviyo event sent'
+      );
 
       db.run(
         `
@@ -158,7 +151,7 @@ router.post('/', async (req, res) => {
 
   } catch (error) {
 
-    console.error('ERROR:', error);
+    console.error(error);
 
     return res.status(500).json({
       success: false,
