@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 
@@ -11,14 +10,8 @@ const {
 const {
   createRewardDiscount
 } = require('../services/rewardService');
+
 const db = require('../database/db');
-
-router.post('/', async (req, res) => {
-
-  console.log('REFERRAL ENDPOINT HIT');
-  console.log(req.body);
-});
-
 
 router.post(
   '/order-created',
@@ -36,6 +29,8 @@ router.post(
         'ORDER WEBHOOK RECEIVED'
       );
 
+      console.log(req.body);
+
       const referral =
         await new Promise(
           (resolve, reject) => {
@@ -43,10 +38,10 @@ router.post(
             db.get(
               `
               SELECT *
-FROM referrals
-WHERE friend_email = ?
-ORDER BY id DESC
-LIMIT 1
+              FROM referrals
+              WHERE friend_email = ?
+              ORDER BY id DESC
+              LIMIT 1
               `,
               [email],
               (err, row) => {
@@ -78,72 +73,75 @@ LIMIT 1
 
       console.log(referral);
 
-if (
-  referral.status === 'completed'
-) {
+      if (
+        referral.status === 'completed'
+      ) {
 
-  console.log(
-    'Reward already issued'
-  );
+        console.log(
+          'Reward already issued'
+        );
 
-  return res
-    .status(200)
-    .send('Already processed');
-
-}
-
-
-      const reward =
-  await createRewardDiscount(
-    referral.referrer_email
-  );
-
-console.log(
-  'Reward Code:',
-  reward.code
-);
-
-await new Promise(
-  (resolve, reject) => {
-
-    db.run(
-      `
-      UPDATE referrals
-      SET
-        reward_discount_code = ?,
-        status = 'completed',
-        order_id = ?
-      WHERE id = ?
-      `,
-      [
-        reward.code,
-        order_id,
-        referral.id
-      ],
-      function(err) {
-
-        if (err) reject(err);
-        else resolve();
+        return res
+          .status(200)
+          .send('Already processed');
 
       }
-    );
 
-  }
-);
+      const reward =
+        await createRewardDiscount(
+          referral.referrer_email
+        );
 
-console.log('CALLING KLAVIYO REWARD EVENT');
+      console.log(
+        'Reward Code:',
+        reward.code
+      );
 
-await sendRewardEmail(
-  referral.referrer_email,
-  reward.code,
-  referral.friend_email
-);
+      await new Promise(
+        (resolve, reject) => {
 
-console.log('KLAVIYO REWARD EVENT FINISHED');
+          db.run(
+            `
+            UPDATE referrals
+            SET
+              reward_discount_code = ?,
+              status = 'completed',
+              order_id = ?
+            WHERE id = ?
+            `,
+            [
+              reward.code,
+              order_id,
+              referral.id
+            ],
+            function(err) {
+
+              if (err) reject(err);
+              else resolve();
+
+            }
+          );
+
+        }
+      );
+
+      console.log(
+        'CALLING KLAVIYO REWARD EVENT'
+      );
+
+      await sendRewardEmail(
+        referral.referrer_email,
+        reward.code,
+        referral.friend_email
+      );
+
+      console.log(
+        'KLAVIYO REWARD EVENT FINISHED'
+      );
 
       return res
         .status(200)
-        .send('Referral Found');
+        .send('Referral processed');
 
     } catch (error) {
 
